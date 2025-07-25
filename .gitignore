@@ -5,3 +5,4 @@ __pycache__/
 *.png
 *.html
 quiz_results.json
+docs/

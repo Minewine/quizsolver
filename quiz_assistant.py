@@ -6,21 +6,28 @@ Copy quiz question text, then press Enter in this terminal to get AI answers
 import asyncio
 import httpx
 import pyperclip
-
+import os
 from datetime import datetime
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, use system env vars
 
 
 class QuizAssistant:
     def __init__(self):
         self.openrouter_api_key = (
-            "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"
+            os.getenv("OPENROUTER_API_KEY") or "your-api-key-here"
         )
         self.openrouter_url = "https://openrouter.ai/api/v1/chat/completions"
         self.model = "mistralai/mistral-small-3.2-24b-instruct:free"
         self.last_clipboard = ""
 
-        print("🤖 Quiz Assistant Started!")
-        print("📋 How to use:")
+        print("Quiz Assistant Started!")
+        print("How to use:")
         print("   1. Copy quiz question text (Ctrl+C)")
         print("   2. Press ENTER in this terminal")
         print("   3. Get AI answer instantly!")
@@ -65,33 +72,33 @@ Return nothing else, just the answers"""
                     result = response.json()
                     return result["choices"][0]["message"]["content"].strip()
                 else:
-                    return f"❌ API Error: {response.status_code} - {response.text}"
+                    return f"API Error: {response.status_code} - {response.text}"
 
         except Exception as e:
-            return f"❌ Error: {str(e)}"
+            return f"Error: {str(e)}"
 
     async def process_question(self, question_text: str):
         """Process the text as a quiz question"""
         try:
             if not question_text.strip():
-                print("⚠️ No text provided!")
+                print("No text provided!")
                 return
 
             timestamp = datetime.now().strftime("%H:%M:%S")
-            print(f"\n[{timestamp}] 📝 Question:")
+            print(f"\n[{timestamp}] Question:")
             print(f"'{question_text[:150]}{'...' if len(question_text) > 150 else ''}")
             print("-" * 50)
 
             # Get LLM analysis
-            print("🤖 Getting LLM analysis...")
+            print("Getting LLM analysis...")
             llm_response = await self.query_llm(question_text)
 
-            print("🎯 LLM Response:")
+            print("LLM Response:")
             print(llm_response)
             print("=" * 50)
 
         except Exception as e:
-            print(f"❌ Error processing question: {e}")
+            print(f"Error processing question: {e}")
 
     def get_clipboard_content(self):
         """Get current clipboard content"""
@@ -103,7 +110,7 @@ Return nothing else, just the answers"""
 
     async def run(self):
         """Main interactive loop"""
-        print("\n🎯 Ready! Copy a quiz question and press ENTER...")
+        print("\nReady! Copy a quiz question and press ENTER...")
 
         while True:
             try:
@@ -113,7 +120,7 @@ Return nothing else, just the answers"""
                 ).strip()
 
                 if user_input.lower() in ["exit", "quit", "q"]:
-                    print("👋 Goodbye!")
+                    print("Goodbye!")
                     break
 
                 # Check if user typed a question directly
@@ -132,10 +139,10 @@ Return nothing else, just the answers"""
                         print("📋 Clipboard is empty. Copy some text first!")
 
             except KeyboardInterrupt:
-                print("\n👋 Quiz Assistant stopped.")
+                print("\nQuiz Assistant stopped.")
                 break
             except Exception as e:
-                print(f"❌ Error: {e}")
+                print(f"Error: {e}")
 
 
 def main():
